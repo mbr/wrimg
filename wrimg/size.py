@@ -7,10 +7,34 @@ UNITS_1024 = ['kibibyte', 'mebibyte', 'gibibyte', 'tebibyte', 'pebibyte',
 U_1000 = ['k', 'm', 'g', 't', 'p', 'e', 'z', 'y']
 U_1024 = ['K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
 
+_PARSE = [
+    (UNITS_1000, 1000),
+    (UNITS_1024, 1024),
+    (U_1000, 1000),
+    (U_1024, 1024),
+]
+
 FMT_RE = re.compile(r'(.*?)( )?(hh|HH|h|H)$')
+VAL_RE = re.compile(r'(\d+(?:\.\d+))(?: )?(.*)')
 
 
 class ByteSize(float):
+    @staticmethod
+    def __new__(cls, val):
+        if isinstance(val, (str, unicode)):
+            val = str(val)
+
+            for units, base in _PARSE:
+                for idx, suffix in enumerate(units):
+                    if val.endswith(suffix):
+                        val = val[:-len(suffix)]
+                        num = float(val) * base ** (idx+1)
+                        return float.__new__(cls, num)
+            return float(val)
+        else:
+            # if no string, just pass through
+            return float.__new__(cls, val)
+
     def __format__(self, fmt):
         base = None
 
