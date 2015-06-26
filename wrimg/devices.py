@@ -1,6 +1,8 @@
 import os
 from stat import S_IFBLK
 
+from .size import ByteSize
+
 
 class Device(object):
     def __init__(self, path):
@@ -26,7 +28,9 @@ class Device(object):
                             .format(self))
 
     def _lookup_sys(self, name):
-        return open(os.path.join(self.sys_fs_path, name), 'rb').read()
+        return open(
+            os.path.join(self.sys_fs_path, name), 'rb'
+        ).read().rstrip('\n')
 
     def _lookup_sys_bool(self, name):
         return int(self._lookup_sys(name)) == 1
@@ -37,7 +41,11 @@ class Device(object):
 
     @property
     def size(self):
-        return int(self._lookup_sys('size'))
+        return ByteSize(int(self._lookup_sys('size')) * 512)
+
+    @property
+    def model(self):
+        return self._lookup_sys('device/model')
 
     @property
     def read_only(self):
