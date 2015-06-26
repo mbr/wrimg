@@ -51,6 +51,9 @@ class Device(object):
     def read_only(self):
         return self._lookup_sys_bool('ro')
 
+    def open(self, mode='r'):
+        return open(self.path, mode)
+
     def __repr__(self):
         return '{0.__class__.__name__}({0.path})'.format(self)
 

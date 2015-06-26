@@ -2,6 +2,7 @@ from functools import partial
 import os
 from stat import S_IFREG
 import sys
+import time
 
 import click
 
@@ -50,7 +51,10 @@ def dev_info(dev):
 @click.option('--verbose', '-v', is_flag=True, default=False)
 @click.option('--limit', '-l', type=ByteSize)
 @click.option('--i-know-what-im-doing', is_flag=True, default=False)
-def wrimg(image_file, target, verbose, i_know_what_im_doing, limit):
+@click.option('--chunk-size', '-C', type=ByteSize, default=None,
+              help='Read-buffer size (default:Lauto-adjust)')
+def wrimg(image_file, target, verbose, i_know_what_im_doing, limit,
+          chunk_size):
     if verbose:
         info = click.echo
     else:
@@ -118,3 +122,37 @@ def wrimg(image_file, target, verbose, i_know_what_im_doing, limit):
 
     info('Copying {:.0f} bytes from {} to {.path}'.format(
          total, image_file, target))
+
+    # start with 4K, go up to 4M with bufsize
+    MIN_BUFSIZE = 4 * 1024
+    MAX_BUFSIZE = 1024 * MIN_BUFSIZE
+    bufsize = chunk_size or MIN_BUFSIZE
+
+    with click.progressbar(length=total, label='writing', show_pos=True)\
+            as bar, open(image_file, 'rb') as src, target.open('wb') as dst:
+        while total:
+            # measure time
+            start = time.time()
+
+            buf = src.read(min(total, bufsize))
+            if not buf:
+                break
+            dst.write(buf)
+            dst.flush()
+            os.fsync(dst.fileno())
+
+            end = time.time()
+
+            speed = ByteSize(len(buf) / (end-start))
+
+            # adjust chunk size if needed
+            if chunk_size is None:
+                if end - start > 2 and bufsize > MIN_BUFSIZE:
+                    # took longer then two seconds, halve bufsize
+                    bufsize //= 2
+                elif end - start < 0.5 and bufsize < MAX_BUFSIZE:
+                    bufsize *= 2
+
+            total -= len(buf)
+            bar.label = '{:.1f H}/s'.format(speed)
+            bar.update(len(buf))
