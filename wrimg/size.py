@@ -18,7 +18,7 @@ FMT_RE = re.compile(r'(.*?)( )?(hh|HH|h|H)$')
 VAL_RE = re.compile(r'(\d+(?:\.\d+))(?: )?(.*)')
 
 
-class ByteSize(float):
+class ByteSize(long):
     @staticmethod
     def __new__(cls, val):
         if isinstance(val, (str, unicode)):
@@ -28,12 +28,12 @@ class ByteSize(float):
                 for idx, suffix in enumerate(units):
                     if val.endswith(suffix):
                         val = val[:-len(suffix)]
-                        num = float(val) * base ** (idx+1)
-                        return float.__new__(cls, num)
-            return float(val)
+                        num = long(val) * base ** (idx+1)
+                        return long.__new__(cls, num)
+            return long(val)
         else:
             # if no string, just pass through
-            return float.__new__(cls, val)
+            return long.__new__(cls, val)
 
     def __format__(self, fmt):
         base = None
