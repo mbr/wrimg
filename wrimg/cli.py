@@ -63,7 +63,9 @@ def wrimg(image_file, target, verbose):
 
         # display menu
         for i, c in enumerate(candidates):
-            click.echo('[{1}] {0.path}: foo'.format(c, i))
+            click.echo(
+                '[{1}] {0.path} ({0.size:.1fH}): {0.model}'
+                .format(c, i))
         idx = int(click.prompt(
             'Select a device',
             type=click.Choice(map(str, range(len(candidates))))
