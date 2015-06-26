@@ -1,9 +1,12 @@
 from functools import partial
+import os
+from stat import S_IFREG
 import sys
 
 import click
 
 from .devices import Device
+from .size import ByteSize
 
 
 # this will possibly have to be adjusted in the future with huge usb-sticks
@@ -38,14 +41,16 @@ def dev_info(dev):
 
 
 @click.command()
-@click.argument('image-file')
+@click.argument('image-file', type=click.Path(readable=True, dir_okay=False,
+                                              exists=True))
 @click.option('--target', '-t',
               type=click.Path(dir_okay=False, writable=True),
               help='The target to write to. If none is given, a menu is shown'
                    ' to select one.')
 @click.option('--verbose', '-v', is_flag=True, default=False)
+@click.option('--limit', '-l', type=ByteSize)
 @click.option('--i-know-what-im-doing', is_flag=True, default=False)
-def wrimg(image_file, target, verbose, i_know_what_im_doing):
+def wrimg(image_file, target, verbose, i_know_what_im_doing, limit):
     if verbose:
         info = click.echo
     else:
@@ -97,6 +102,19 @@ def wrimg(image_file, target, verbose, i_know_what_im_doing):
     assert click.confirm('Write to {}?'.format(dev_info(target)),
                          err=True, abort=True)
 
-    info('Writing {} to {.path}'.format(image_file, target))
+    # determine number of bytes to write
+    img_st = os.stat(image_file)
 
-    # transfer begins here
+    # start with the device size
+    total = target.size
+
+    if img_st.st_mode & S_IFREG:
+        # regular file, limit by its size
+        total = min(total, img_st.st_size)
+
+    # apply limt
+    if limit is not None:
+        total = min(total, limit)
+
+    info('Copying {:.0f} bytes from {} to {.path}'.format(
+         total, image_file, target))
