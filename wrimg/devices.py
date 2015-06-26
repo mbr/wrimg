@@ -1,11 +1,8 @@
 import os
-import re
 from stat import S_IFBLK
 
 
 class Device(object):
-    BLOCK_DEVICE_RE = re.compile('^/dev/sd.$')
-
     def __init__(self, path):
         # strip all symbolic links and make path absolute (for /proc/mounts)
         self.path = os.path.abspath(os.path.realpath(path))
@@ -35,7 +32,7 @@ class Device(object):
         return int(self._lookup_sys(name)) == 1
 
     @property
-    def is_removable(self):
+    def removable(self):
         return self._lookup_sys_bool('removable')
 
     @property
@@ -46,8 +43,11 @@ class Device(object):
     def read_only(self):
         return self._lookup_sys_bool('ro')
 
+    def __repr__(self):
+        return '{0.__class__.__name__}({0.path})'.format(self)
+
     @classmethod
-    def iter_block_devices(cls):
-        for name in os.listdir('/dev'):
-            if cls.BLOCK_DEVICE_RE.match(name):
-                yield cls(name)
+    def iter_block_devices(cls, base_path='/dev'):
+        for name in os.listdir(base_path):
+            if name.startswith('sd') and len(name) == 3:
+                yield cls(os.path.join(base_path, name))
