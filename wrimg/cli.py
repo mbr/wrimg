@@ -128,7 +128,7 @@ def wrimg(image_file, target, verbose, i_know_what_im_doing, limit,
     MAX_BUFSIZE = 1024 * MIN_BUFSIZE
     bufsize = chunk_size or MIN_BUFSIZE
 
-    with click.progressbar(length=total, label='writing', show_pos=True)\
+    with click.progressbar(length=total, label='writing', info_sep=' | ')\
             as bar, open(image_file, 'rb') as src, target.open('wb') as dst:
         while total:
             # measure time
