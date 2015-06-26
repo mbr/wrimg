@@ -31,3 +31,6 @@ Usage
 Usage is straightforward:
 
   $ wrimg someimg.iso -t /dev/sdX
+
+The ``--target/-t`` can be omitted, causing wrimg to display a menu of suitable
+targets. For other options, check the ``--help`` option.
