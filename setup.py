@@ -12,7 +12,7 @@ def read(fname):
 
 setup(
     name='wrimg',
-    version='0.1.dev1',
+    version='0.1',
     description='An alternative to dd for writing images to sd-cards',
     long_description=read('README.rst'),
     author='Marc Brinkmann',
