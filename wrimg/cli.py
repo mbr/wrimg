@@ -96,14 +96,14 @@ class Reader(object):
               default=None,
               help='Read-buffer size (default: auto-adjust)')
 @click.option('-d',
-              '--compression-type',
+              '--decompress',
               default='auto',
-              type=click.Choice(['auto', 'xz']),
-              help='Compression-type')
+              type=click.Choice(['auto', 'none', 'xz']),
+              help='On-the-fly decompression (default: auto-detect)')
 @click.option('-e/-E',
               '--eject/--no-eject',
               default=True,
-              help='Eject medium after writing (default: true).')
+              help='Eject medium after writing (default: True).')
 @click.option('--limit',
               '-l',
               type=ByteSize,
@@ -123,16 +123,12 @@ class Reader(object):
               is_flag=True,
               default=False,
               help='Output more detailed information.')
-@click.option(
-    '-x/-X',
-    '--extract/--no-extract',
-    help='Transparently decompress image while writing (default: True)')
 @click.option('--i-know-what-im-doing',
               is_flag=True,
               default=False,
               help='Disable all safety checks.')
 def wrimg(image_file, target, verbose, i_know_what_im_doing, limit, chunk_size,
-          extract, compression_type, max_size, eject):
+          decompress, max_size, eject):
     if verbose:
         info = click.echo
     else:
@@ -180,16 +176,19 @@ def wrimg(image_file, target, verbose, i_know_what_im_doing, limit, chunk_size,
 
     # determine compression type
     verb = 'Write'
-    if extract:
-        if compression_type == 'auto':
-            if image_file.endswith('.xz'):
-                compression_type = 'xz'
-            else:
-                error('Could not determine compression type from file-ending')
-                sys.exit(1)
 
-        info('Decompression enabled, using {}'.format(compression_type))
-        verb = 'Decompress ({}) and write'.format(compression_type)
+    if decompress == 'auto':
+        if image_file.endswith('.xz'):
+            decompress = 'xz'
+        else:
+            error('Could not determine compression type from file-ending')
+            sys.exit(1)
+    elif decompress == 'none':
+        decompress = None
+
+    if decompress:
+        info('Decompression enabled, using {}'.format(decompress))
+        verb = 'Decompress ({}) and write'.format(decompress)
 
     # confirm start, featuring the defensive assert!
     assert click.confirm('{} to {}?'.format(verb, dev_info(target)),
@@ -202,7 +201,7 @@ def wrimg(image_file, target, verbose, i_know_what_im_doing, limit, chunk_size,
     # start with the target device size
     total = target.size
 
-    if not extract and img_st.st_mode & S_IFREG:
+    if not decompress and img_st.st_mode & S_IFREG:
         # regular file, limit by its size
         total = min(total, img_st.st_size)
 
@@ -215,21 +214,21 @@ def wrimg(image_file, target, verbose, i_know_what_im_doing, limit, chunk_size,
 
     with open(image_file, 'rb') as src, target.open('wb') as dst:
         # compression hooks in here
-        if extract:
-            if compression_type == 'xz':
+        if decompress:
+            if decompress == 'xz':
                 decompress = subprocess.Popen(
                     ['xz', '--decompress', '--stdout'],
                     stdout=subprocess.PIPE,
                     stdin=src, )
             else:
                 raise NotImplementedError('Unknown compressoin type {}'
-                                          .format(compression_type))
+                                          .format(decompress))
 
             src = decompress.stdout
 
         reader = Reader(src, chunk_size, limit)
 
-        if not extract:
+        if not decompress:
             pbar = click.progressbar(length=total,
                                      label='writing',
                                      info_sep='| ')
@@ -244,7 +243,7 @@ def wrimg(image_file, target, verbose, i_know_what_im_doing, limit, chunk_size,
                                      item_show_func=show_bytes_written)
 
         with pbar as bar:
-            chunk_source = pbar if extract else reader
+            chunk_source = pbar if decompress else reader
 
             for chunk in chunk_source:
                 # measure time
@@ -268,7 +267,7 @@ def wrimg(image_file, target, verbose, i_know_what_im_doing, limit, chunk_size,
 
                 bar.label = '{:.1f H}/s'.format(speed)
 
-                if not extract:
+                if not decompress:
                     bar.update(len(chunk))
 
     # we're done writing, call eject
