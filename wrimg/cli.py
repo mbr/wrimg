@@ -94,7 +94,7 @@ class Reader(object):
               '-C',
               type=ByteSize,
               default=None,
-              help='Read-buffer size (default:Lauto-adjust)')
+              help='Read-buffer size (default: auto-adjust)')
 @click.option('-d',
               '--compression-type',
               default='auto',
