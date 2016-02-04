@@ -5,7 +5,7 @@ wrimg
 the following advantages:
 
 * Syncs buffers after each chunk is written, allowing ``C-c`` to work
-* For the same reason can make accurate predictions about the remaining time
+* For the same reason ``wrimg`` can make accurate predictions about the remaining time
 * Automatically adjusts buffer size when copying
 * Contains extra safety-checks to keep you from accidentally erasing your
   hard drives!
