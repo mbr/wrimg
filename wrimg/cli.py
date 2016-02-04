@@ -262,7 +262,7 @@ def wrimg(image_file, target, verbose, i_know_what_im_doing, limit, chunk_size,
                 if chunk_size is None:
                     if end - start > 2:
                         # took longer then two seconds, halve bufsize
-                        reader.decreate_buffer()
+                        reader.decrease_buffer()
                     elif end - start < 0.5:
                         reader.increase_buffer()
 
