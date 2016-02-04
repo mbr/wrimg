@@ -100,6 +100,10 @@ class Reader(object):
               default='auto',
               type=click.Choice(['auto', 'xz']),
               help='Compression-type')
+@click.option('-e/-E',
+              '--eject/--no-eject',
+              default=True,
+              help='Eject medium after writing (default: true).')
 @click.option('--limit',
               '-l',
               type=ByteSize,
@@ -128,7 +132,7 @@ class Reader(object):
               default=False,
               help='Disable all safety checks.')
 def wrimg(image_file, target, verbose, i_know_what_im_doing, limit, chunk_size,
-          extract, compression_type, max_size):
+          extract, compression_type, max_size, eject):
     if verbose:
         info = click.echo
     else:
@@ -266,3 +270,7 @@ def wrimg(image_file, target, verbose, i_know_what_im_doing, limit, chunk_size,
 
                 if not extract:
                     bar.update(len(chunk))
+
+    # we're done writing, call eject
+    info('Ejecting {}'.format(target.path))
+    subprocess.check_open(['eject', target.path])
