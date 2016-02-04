@@ -101,8 +101,15 @@ class Reader(object):
                               writable=True),
               help='The target to write to. If none is given, a menu is shown'
               ' to select one.')
-@click.option('--verbose', '-v', is_flag=True, default=False)
-@click.option('--limit', '-l', type=ByteSize)
+@click.option('--verbose',
+              '-v',
+              is_flag=True,
+              default=False,
+              help='Output more detailed information.')
+@click.option('--limit',
+              '-l',
+              type=ByteSize,
+              help='Write no more than this many bytes to device.')
 @click.option('--i-know-what-im-doing', is_flag=True, default=False)
 @click.option('--chunk-size',
               '-C',
