@@ -123,10 +123,10 @@ class Reader(object):
               is_flag=True,
               default=False,
               help='Output more detailed information.')
-@click.option('-x',
-              '--extract',
-              is_flag=True,
-              help='Transparently decompress image while writing')
+@click.option(
+    '-x/-X',
+    '--extract/--no-extract',
+    help='Transparently decompress image while writing (default: True)')
 @click.option('--i-know-what-im-doing',
               is_flag=True,
               default=False,
