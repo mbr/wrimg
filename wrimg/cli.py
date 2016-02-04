@@ -165,7 +165,7 @@ def wrimg(image_file, target, verbose, i_know_what_im_doing, limit, chunk_size,
         target = Device(target)
 
     # sanity-check target-device
-    ok, msg = candidate_for_writing(target)
+    ok, msg = candidate_for_writing(target, max_size)
 
     if not ok:
         if not i_know_what_im_doing:
