@@ -90,11 +90,24 @@ class Reader(object):
                 type=click.Path(readable=True,
                                 dir_okay=False,
                                 exists=True))
+@click.option('--chunk-size',
+              '-C',
+              type=ByteSize,
+              default=None,
+              help='Read-buffer size (default:Lauto-adjust)')
 @click.option('-d',
               '--compression-type',
               default='auto',
               type=click.Choice(['auto', 'xz']),
               help='Compression-type')
+@click.option('--limit',
+              '-l',
+              type=ByteSize,
+              help='Write no more than this many bytes to device.')
+@click.option(
+    '--max-size',
+    default=32 * G,
+    help='Maximum size in bytes before rejecting to write to device.')
 @click.option('--target',
               '-t',
               type=click.Path(dir_okay=False,
@@ -106,24 +119,14 @@ class Reader(object):
               is_flag=True,
               default=False,
               help='Output more detailed information.')
-@click.option('--limit',
-              '-l',
-              type=ByteSize,
-              help='Write no more than this many bytes to device.')
-@click.option('--i-know-what-im-doing', is_flag=True, default=False)
-@click.option('--chunk-size',
-              '-C',
-              type=ByteSize,
-              default=None,
-              help='Read-buffer size (default:Lauto-adjust)')
-@click.option(
-    '--max-size',
-    default=32 * G,
-    help='Maximum size in bytes before rejecting to write to device.')
 @click.option('-x',
               '--extract',
               is_flag=True,
               help='Transparently decompress image while writing')
+@click.option('--i-know-what-im-doing',
+              is_flag=True,
+              default=False,
+              help='Disable all safety checks.')
 def wrimg(image_file, target, verbose, i_know_what_im_doing, limit, chunk_size,
           extract, compression_type, max_size):
     if verbose:
