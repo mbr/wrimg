@@ -58,7 +58,7 @@ class Reader(object):
     def increase_buffer(self):
         self.buffer_size = min(self.buffer_size * 2, self.BUFFER_SIZE_MAX)
 
-    def decreate_buffer(self):
+    def decrease_buffer(self):
         self.buffer_size = max(self.buffer_size // 2, self.BUFFER_SIZE_MIN)
 
     def __iter__(self):
