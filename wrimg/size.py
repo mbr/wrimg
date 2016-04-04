@@ -1,4 +1,10 @@
 import re
+import sys
+
+if sys.version_info.major < 3:
+    long_int = long
+else:
+    long_int = int
 
 UNITS_1000 = ['kilobyte', 'megabyte', 'gigabyte', 'terabyte', 'petabyte',
               'exabyte', 'zetabyte', 'yottabyte']
@@ -18,7 +24,7 @@ FMT_RE = re.compile(r'(.*?)( )?(hh|HH|h|H)$')
 VAL_RE = re.compile(r'(\d+(?:\.\d+))(?: )?(.*)')
 
 
-class ByteSize(long):
+class ByteSize(long_int):
     @staticmethod
     def __new__(cls, val):
         if isinstance(val, (str, unicode)):
