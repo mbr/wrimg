@@ -34,7 +34,7 @@ class ByteSize(long_int):
                 for idx, suffix in enumerate(units):
                     if val.endswith(suffix):
                         val = val[:-len(suffix)]
-                        num = long(val) * base ** (idx+1)
+                        num = long(val) * base**(idx + 1)
                         return long.__new__(cls, num)
             return long(val)
         else:
