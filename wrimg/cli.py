@@ -127,6 +127,7 @@ class Reader(object):
               is_flag=True,
               default=False,
               help='Disable all safety checks.')
+@click.version_option()
 def wrimg(image_file, target, verbose, i_know_what_im_doing, limit, chunk_size,
           decompress, max_size, eject):
     if verbose:
