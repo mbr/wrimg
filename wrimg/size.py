@@ -5,8 +5,10 @@ import sys
 
 if sys.version_info.major < 3:
     long_int = long
+    text_types = (str, unicode)
 else:
     long_int = int
+    text_types = str
 
 UNITS_1000 = ['kilobyte', 'megabyte', 'gigabyte', 'terabyte', 'petabyte',
               'exabyte', 'zetabyte', 'yottabyte']
@@ -29,7 +31,7 @@ VAL_RE = re.compile(r'(\d+(?:\.\d+))(?: )?(.*)')
 class ByteSize(long_int):
     @staticmethod
     def __new__(cls, val):
-        if isinstance(val, (str, unicode)):
+        if isinstance(val, text_types):
             val = str(val)
 
             for units, base in _PARSE:
@@ -38,10 +40,10 @@ class ByteSize(long_int):
                         val = val[:-len(suffix)]
                         num = long(val) * base**(idx + 1)
                         return long.__new__(cls, num)
-            return long(val)
+            return long_int(val)
         else:
             # if no string, just pass through
-            return long.__new__(cls, val)
+            return long_int.__new__(cls, val)
 
     def __format__(self, fmt):
         base = None

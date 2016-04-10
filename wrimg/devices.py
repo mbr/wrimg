@@ -44,7 +44,7 @@ class Device(object):
 
     @property
     def model(self):
-        return self._lookup_sys('device/model')
+        return self._lookup_sys('device/model').decode('utf8').strip()
 
     @property
     def read_only(self):
