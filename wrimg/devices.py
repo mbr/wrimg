@@ -29,8 +29,7 @@ class Device(object):
 
     def _lookup_sys(self, name):
         return open(
-            os.path.join(self.sys_fs_path, name), 'rb'
-        ).read().rstrip('\n')
+            os.path.join(self.sys_fs_path, name), 'rb').read().rstrip(b'\n')
 
     def _lookup_sys_bool(self, name):
         return int(self._lookup_sys(name)) == 1
