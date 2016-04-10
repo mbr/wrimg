@@ -1,3 +1,5 @@
+# FIXME: replace with datasize package (from PyPI)
+
 import re
 import sys
 
