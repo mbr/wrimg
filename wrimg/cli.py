@@ -285,3 +285,4 @@ def wrimg(image_file, target, verbose, i_know_what_im_doing, limit, chunk_size,
     # we're done writing, call eject
     info('Ejecting {}'.format(target.path))
     subprocess.check_call(['eject', target.path])
+    click.echo('Safe to remove {}'.format(target.path))
