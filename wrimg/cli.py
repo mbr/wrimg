@@ -180,6 +180,8 @@ def wrimg(image_file, target, verbose, i_know_what_im_doing, limit, chunk_size,
     if decompress == 'auto':
         if image_file.endswith('.xz'):
             decompress = 'xz'
+        elif image_file.endswith('.iso') or image_file.endswith('.img'):
+            decompress = None
         else:
             error('Could not determine compression type from file-ending')
             sys.exit(1)
