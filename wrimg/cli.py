@@ -30,7 +30,7 @@ def candidate_for_writing(dev, max_size):
     if dev.size == 0:
         return False, 'device has 0 size'
 
-    if dev.size > max_size:
+    if max_size is not None and dev.size > max_size:
         return False, 'device has a size larger than {} bytes'.format(max_size)
 
     return True, None
@@ -86,10 +86,10 @@ class Reader(object):
 
 
 @click.command()
-@click.argument('image-file',
-                type=click.Path(readable=True,
-                                dir_okay=False,
-                                exists=True))
+@click.argument(
+    'image-file',
+    type=click.Path(readable=True, dir_okay=False,
+                    exists=True))
 @click.option('--chunk-size',
               '-C',
               type=ByteSize,
@@ -110,12 +110,11 @@ class Reader(object):
               help='Write no more than this many bytes to device.')
 @click.option(
     '--max-size',
-    default=32 * G,
+    default=None,
     help='Maximum size in bytes before rejecting to write to device.')
 @click.option('--target',
               '-t',
-              type=click.Path(dir_okay=False,
-                              writable=True),
+              type=click.Path(dir_okay=False, writable=True),
               help='The target to write to. If none is given, a menu is shown'
               ' to select one.')
 @click.option('--verbose',
