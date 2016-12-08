@@ -1,3 +1,4 @@
+import atexit
 from functools import partial
 import os
 from stat import S_IFREG
@@ -86,10 +87,10 @@ class Reader(object):
 
 
 @click.command()
-@click.argument(
-    'image-file',
-    type=click.Path(readable=True, dir_okay=False,
-                    exists=True))
+@click.argument('image-file',
+                type=click.Path(readable=True,
+                                dir_okay=False,
+                                exists=True))
 @click.option('--chunk-size',
               '-C',
               type=ByteSize,
@@ -114,7 +115,8 @@ class Reader(object):
     help='Maximum size in bytes before rejecting to write to device.')
 @click.option('--target',
               '-t',
-              type=click.Path(dir_okay=False, writable=True),
+              type=click.Path(dir_okay=False,
+                              writable=True),
               help='The target to write to. If none is given, a menu is shown'
               ' to select one.')
 @click.option('--verbose',
@@ -126,9 +128,17 @@ class Reader(object):
               is_flag=True,
               default=False,
               help='Disable all safety checks.')
+@click.option('-p',
+              '--pause',
+              is_flag=True,
+              default=False,
+              help='Pause before exiting')
 @click.version_option()
 def wrimg(image_file, target, verbose, i_know_what_im_doing, limit, chunk_size,
-          decompress, max_size, eject):
+          decompress, max_size, eject, pause):
+    if pause:
+        atexit.register(lambda: input('Press enter to close'))
+
     if verbose:
         info = click.echo
     else:
